@@ -33,8 +33,8 @@ function findpeaks(arr:number[]):number[]{
         var scanning2peak = 1
         var evaluators = [(a,b) => b - a,(a,b) => a - b]
         var arrs = [valleys,peakIndices]
-        var i = 1
-        while(i < arr.length - 1){
+        var i = 0
+        while(i < arr.length){
             let res = scan2extreme(arr,i,evaluators[scanning2peak])
             arrs[scanning2peak].push(res.peaki)
             i = res.trailingEdgeIndex
