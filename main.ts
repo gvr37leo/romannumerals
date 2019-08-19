@@ -44,18 +44,19 @@ function calcMountain(starti:number,peaki:number,endi:number,arr:number[]){
     return sum
 }
 
-function findPeakIndices(arr:number[]):{peakFirst:boolean,peakIndices:number[],valleyIndices:number[]}{
+function findPeakIndices(arr:number[]):{peakFirst:number,peakIndices:number[],valleyIndices:number[]}{
     if(arr.length == 0){
-        return {peakFirst:true, peakIndices:[],valleyIndices:[]}
+        return {peakFirst:1, peakIndices:[],valleyIndices:[]}
     }else{
         var peakIndices:number[] = []
         var valleyIndices:number[] = []
-        var ipf = isPeakFirst(arr)
-
-        var scanning2peak = 1
         var evaluators = [(a,b) => b - a,(a,b) => a - b]
         var arrs = [valleyIndices,peakIndices]
-        var i = 0
+        var ipf = isPeakFirst(arr)
+        arrs[ipf.isPeak].push(0)
+        var scanning2peak = 1 - ipf.isPeak
+        
+        var i = ipf.firstChangeIndex
         while(i < arr.length){
             let res = scan2extreme(arr,i,evaluators[scanning2peak])
             arrs[scanning2peak].push(res.peaki)
@@ -64,7 +65,7 @@ function findPeakIndices(arr:number[]):{peakFirst:boolean,peakIndices:number[],v
         }
     
         return {
-            peakFirst:null,
+            peakFirst:ipf.isPeak,
             peakIndices,
             valleyIndices,
         }
