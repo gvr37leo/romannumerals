@@ -12,27 +12,49 @@ var symbolmap = {
     'M':1000,
 }
 
-function roman2decimal(string){
+function roman2decimal(string:string){
     var result = 0
-    var biggestchar
-    for(var char of string){
-        var value = symbolmap[char]
+
+    var numbers = string.split('').map(c => symbolmap[c])
+    var r = findPeakIndices(numbers)
+    var peakIndices = r.peakIndices
+    var valleys = r.valleyIndices
+
+    var values = []
+    for(var i = 0; i < peakIndices.length; i++){
+        var peaki = peakIndices[i]
+        var left = valleys[i]
+        var right = valleys[i] - 1
+        values.push(calcMountain(left,peaki,right,numbers))
     }
 
     return result
 }
 
-function findpeaks(arr:number[]):number[]{
+function calcMountain(starti:number,peaki:number,endi:number,arr:number[]){
+    var sum = 0;
+    for(var i = starti; i < peaki; i++){
+        sum = arr[i] - sum
+    }
+
+    for(var i = peaki; i <= endi; i++){
+        sum += arr[i]
+    }
+
+    return sum
+}
+
+function findPeakIndices(arr:number[]):{peakFirst:boolean,peakIndices:number[],valleyIndices:number[]}{
     if(arr.length == 0){
-        return []
-    }else if(arr.length == 1 || arr.length == 2){
-        return [arr[0]]
+        return {peakFirst:true, peakIndices:[],valleyIndices:[]}
     }else{
-        var peakIndices = []
-        var valleys = []
+        var peakIndices:number[] = []
+        var valleyIndices:number[] = []
+        var ipf = isPeakFirst(arr)
+
         var scanning2peak = 1
         var evaluators = [(a,b) => b - a,(a,b) => a - b]
-        var arrs = [valleys,peakIndices]
+        var arrs = [valleyIndices,peakIndices]
         var i = 0
         while(i < arr.length){
             let res = scan2extreme(arr,i,evaluators[scanning2peak])
@@ -41,9 +63,36 @@ function findpeaks(arr:number[]):number[]{
             scanning2peak = 1 - scanning2peak
         }
     
-        return peakIndices
+        return {
+            peakFirst:null,
+            peakIndices,
+            valleyIndices,
+        }
     }
 }
+
+function isPeakFirst(arr:number[]):{isPeak:number,firstChangeIndex:number}{
+    for(var i = 1; i < arr.length; i++){
+        if(arr[i] < arr[i - 1]){
+            return {
+                isPeak:1,
+                firstChangeIndex: i,
+            }
+        }else if(arr[i] > arr[i - 1]){
+            return {
+                isPeak:0,
+                firstChangeIndex: i,
+            }
+        }else{
+            continue
+        }
+    }
+    return {
+        isPeak:1,
+        firstChangeIndex:arr.length
+    }
+}
+
 function scan2extreme(arr:number[],starti:number,evaluator:(a:number,b:number) => number):{peaki:number,trailingEdgeIndex:number}{
     var besti = starti
     var i = starti + 1
@@ -75,11 +124,11 @@ function decimal2roman(number){
 
 roman2decimal('MCMXIV')//1914
 var a = null;
-a = findpeaks([1,2,3,2,1,7,7,7,1])
-a = findpeaks([1,2,1])
-a = findpeaks([2,1,2])
-a = findpeaks([1,2,3])
-a = findpeaks([3,2,1])
+a = findPeakIndices([1,2,3,2,1,7,7,7,1])
+a = findPeakIndices([1,2,1])
+a = findPeakIndices([2,1,2])
+a = findPeakIndices([1,2,3])
+a = findPeakIndices([3,2,1])
 // a = scantopeak([5,4,3,7,8,8,8],0)
 // a = scantopeak([0,1,2,3,3,3,2,1],0)
 // a = scantopeak([3,8],0)
