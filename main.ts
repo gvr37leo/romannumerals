@@ -18,23 +18,41 @@ function roman2decimal(string:string){
     var numbers = string.split('').map(c => symbolmap[c])
     var r = findPeakIndices(numbers)
     var peakIndices = r.peakIndices
-    var valleys = r.valleyIndices
+    var valleyIndices = r.valleyIndices
 
     var values = []
+    
+    if(r.peakFirst){
+        values.push(calcMountain(0,0,valleyIndices[0] - 1,numbers))
+        peakIndices.shift()
+    }
+    var temp
+    if(peakIndices.length == valleyIndices.length){
+        temp = calcMountain(last(valleyIndices),numbers.length - 1,numbers.length - 1,numbers)
+        peakIndices.pop()
+    }
     for(var i = 0; i < peakIndices.length; i++){
         var peaki = peakIndices[i]
-        var left = valleys[i]
-        var right = valleys[i] - 1
-        values.push(calcMountain(left,peaki,right,numbers))
+        var lefti = valleyIndices[i]
+        var righti = valleyIndices[i + 1] - 1
+        values.push(calcMountain(lefti,peaki,righti,numbers))
+    }
+    if(temp != null){
+        values.push(temp)
     }
 
     return result
 }
 
+function last<T>(arr:T[]){
+    return arr[arr.length - 1]
+}
+
+// start and end are inclusive
 function calcMountain(starti:number,peaki:number,endi:number,arr:number[]){
     var sum = 0;
     for(var i = starti; i < peaki; i++){
-        sum = arr[i] - sum
+        sum -= arr[i]
     }
 
     for(var i = peaki; i <= endi; i++){
