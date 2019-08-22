@@ -12,10 +12,24 @@ var symbolmap = {
     'M':1000,
 }
 
+function filterroman(string:string){
+    return string.toUpperCase().split('').filter(v => symbolmap[v] != undefined).join('')
+}
+
 function roman2decimal(string:string){
-    var result = 0
+    string = filterroman(string)
 
     var numbers = string.split('').map(c => symbolmap[c])
+    while(numbers.length > 1){
+        numbers = downscale(numbers)
+    }
+    
+
+    return numbers.reduce((acc, val) => acc + val, 0)
+}
+
+function downscale(numbers:number[]):number[]{
+    var values = []
     var r = findPeakIndices(numbers)
     var peakIndices = r.peakIndices
     var valleyIndices = r.valleyIndices
@@ -27,8 +41,8 @@ function roman2decimal(string:string){
         peakIndices.shift()
     }
     var temp
-    if(peakIndices.length == valleyIndices.length){
-        temp = calcMountain(last(valleyIndices),numbers.length - 1,numbers.length - 1,numbers)
+    if(last(valleyIndices) < numbers.length - 1){
+        temp = calcMountain(last(valleyIndices), numbers.length - 1, numbers.length - 1,numbers)
         peakIndices.pop()
     }
     for(var i = 0; i < peakIndices.length; i++){
@@ -40,8 +54,7 @@ function roman2decimal(string:string){
     if(temp != null){
         values.push(temp)
     }
-
-    return result
+    return values
 }
 
 function last<T>(arr:T[]){
@@ -51,8 +64,9 @@ function last<T>(arr:T[]){
 // start and end are inclusive
 function calcMountain(starti:number,peaki:number,endi:number,arr:number[]){
     var sum = 0;
+    var s = 0
     for(var i = starti; i < peaki; i++){
-        sum -= arr[i]
+        s += arr[i]
     }
 
     for(var i = peaki; i <= endi; i++){
@@ -140,15 +154,6 @@ function scan2extreme(arr:number[],starti:number,evaluator:(a:number,b:number) =
 function decimal2roman(number){
 
 }
-
-roman2decimal('MCMXIV')//1914
-var a = null;
-a = findPeakIndices([1,2,3,2,1,7,7,7,1])
-a = findPeakIndices([1,2,1])
-a = findPeakIndices([2,1,2])
-a = findPeakIndices([1,2,3])
-a = findPeakIndices([3,2,1])
-// a = scantopeak([5,4,3,7,8,8,8],0)
-// a = scantopeak([0,1,2,3,3,3,2,1],0)
-// a = scantopeak([3,8],0)
-// a = scantopeak([3,8,3],0)
+calcMountain(0,1,1,[10,10])
+// var res = roman2decimal('MCXX')
+// console.log(res)
