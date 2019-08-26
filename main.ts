@@ -56,7 +56,7 @@ function downscale(numbers:number[]):number[]{
     }
     function cutend(){
         temp = calcMountain(last(valleyIndices), numbers.length - 1, numbers.length - 1,numbers)
-        peakIndices.splice(last(valleyIndices),2)
+        peakIndices.pop()
     }
     if(peakIndices.length > valleyIndices.length){
         // V
