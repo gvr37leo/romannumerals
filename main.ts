@@ -20,12 +20,12 @@ function roman2decimal(string:string){
     string = filterroman(string)
 
     var numbers = string.split('').map(c => symbolmap[c])
-    while(numbers.length > 1){
-        numbers = downscale(numbers)
-    }
+    // while(numbers.length > 1){
+    numbers = downscale(numbers)
+    // }
     
 
-    return numbers.reduce((acc, val) => acc + val, 0)
+    return sum(numbers)
 }
 
 function downscale(numbers:number[]):number[]{
@@ -36,25 +36,62 @@ function downscale(numbers:number[]):number[]{
 
     var values = []
     
-    if(r.peakFirst){
+    if(numbers.length == 0){
+        return [0]
+    }
+    if(numbers.length == 1){
+        return [numbers[0]]
+    }
+    
+    //trim end
+    var lastindex = Math.max(last(peakIndices),last(valleyIndices))
+    if(lastindex < numbers.length - 1){
+        var val = sum(numbers.splice(lastindex + 1))
+    }
+
+    var temp
+    function custart(){
         values.push(calcMountain(0,0,valleyIndices[0] - 1,numbers))
         peakIndices.shift()
     }
-    var temp
-    if(last(valleyIndices) < numbers.length - 1){
+    function cutend(){
         temp = calcMountain(last(valleyIndices), numbers.length - 1, numbers.length - 1,numbers)
-        peakIndices.pop()
+        peakIndices.splice(last(valleyIndices),2)
     }
+    if(peakIndices.length > valleyIndices.length){
+        // V
+        //cut end and start
+        custart()
+        cutend()
+        
+    }else if(peakIndices.length == valleyIndices.length){ 
+        if(r.peakFirst){
+            // V| cut start
+            custart()
+        }else{
+            //N cut end
+            cutend()
+        }
+    }else{//peakIndices.length < valleyIndices.length    
+        // ^
+        // do nothing
+    }
+    
     for(var i = 0; i < peakIndices.length; i++){
         var peaki = peakIndices[i]
         var lefti = valleyIndices[i]
         var righti = valleyIndices[i + 1] - 1
         values.push(calcMountain(lefti,peaki,righti,numbers))
     }
+
     if(temp != null){
         values.push(temp)
     }
     return values
+}
+
+function sum(arr:number[]){
+    return arr.reduce((acc,c) => acc + c, 0)
 }
 
 function last<T>(arr:T[]){
@@ -64,9 +101,8 @@ function last<T>(arr:T[]){
 // start and end are inclusive
 function calcMountain(starti:number,peaki:number,endi:number,arr:number[]){
     var sum = 0;
-    var s = 0
     for(var i = starti; i < peaki; i++){
-        s += arr[i]
+        sum += arr[i]
     }
 
     for(var i = peaki; i <= endi; i++){
@@ -151,9 +187,11 @@ function scan2extreme(arr:number[],starti:number,evaluator:(a:number,b:number) =
     }
 }
 
-function decimal2roman(number){
+var romaninput = document.querySelector('#romaninput') as HTMLInputElement
+var output = document.querySelector('#output') as HTMLElement
+romaninput.addEventListener('input',() => {
+    output.innerText = roman2decimal(romaninput.value) as any
+})
 
-}
-calcMountain(0,1,1,[10,10])
-// var res = roman2decimal('MCXX')
-// console.log(res)
+
+var res = roman2decimal('XVXX')
