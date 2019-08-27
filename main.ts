@@ -45,8 +45,9 @@ function downscale(numbers:number[]):number[]{
     
     //trim end
     var lastindex = Math.max(last(peakIndices),last(valleyIndices))
+    var endtrim = 0
     if(lastindex < numbers.length - 1){
-        var val = sum(numbers.splice(lastindex + 1))
+        endtrim = sum(numbers.splice(lastindex + 1))
     }
 
     var temp
@@ -57,7 +58,9 @@ function downscale(numbers:number[]):number[]{
     function cutend(){
         temp = calcMountain(last(valleyIndices), numbers.length - 1, numbers.length - 1,numbers)
         peakIndices.pop()
+        numbers.splice(last(valleyIndices))
     }
+    var lastval = 0
     if(peakIndices.length > valleyIndices.length){
         // V
         //cut end and start
@@ -74,18 +77,25 @@ function downscale(numbers:number[]):number[]{
         }
     }else{//peakIndices.length < valleyIndices.length    
         // ^
-        // do nothing
+        lastval = numbers[last(valleyIndices)]
     }
     
     for(var i = 0; i < peakIndices.length; i++){
-        var peaki = peakIndices[i]
         var lefti = valleyIndices[i]
+        var peaki = peakIndices[i]
         var righti = valleyIndices[i + 1] - 1
         values.push(calcMountain(lefti,peaki,righti,numbers))
     }
+    if(lastval > 0){
+        values[values.length - 1] += lastval
+    }
+    
 
     if(temp != null){
         values.push(temp)
+    }
+    if(endtrim > 0){
+        values[values.length - 1] += endtrim
     }
     return values
 }
@@ -101,15 +111,27 @@ function last<T>(arr:T[]){
 // start and end are inclusive
 function calcMountain(starti:number,peaki:number,endi:number,arr:number[]){
     var sum = 0;
+    //upslope
+    var flatsums = []
+    var flatsum = 0
     for(var i = starti; i < peaki; i++){
-        sum += arr[i]
+        if(arr[i] == arr[i + 1]){
+            flatsum += arr[i]
+        }else{
+            flatsum += arr[i]
+            flatsums.push(flatsum)
+            flatsum = 0
+        }
+        
     }
+    var upslopesum = flatsums.reduce((acc,c) => c - acc,0)
 
+    //downslope
     for(var i = peaki; i <= endi; i++){
         sum += arr[i]
     }
 
-    return sum
+    return sum - upslopesum
 }
 
 function findPeakIndices(arr:number[]):{peakFirst:number,peakIndices:number[],valleyIndices:number[]}{
@@ -194,4 +216,4 @@ romaninput.addEventListener('input',() => {
 })
 
 
-var res = roman2decimal('XVXX')
+var res = roman2decimal('IVI')//1914
