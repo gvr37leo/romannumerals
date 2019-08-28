@@ -1,7 +1,5 @@
 //DM XLVII(=47), CXVI(=116), MCXX(=1120), MCMXIV(=1914)
 
-
-
 var symbolmap = {
     'I':1,
     'V':5,
@@ -44,11 +42,17 @@ function downscale(numbers:number[]):number[]{
     }
     
     //trim end
-    var lastindex = Math.max(last(peakIndices),last(valleyIndices))
     var endtrim = 0
-    if(lastindex < numbers.length - 1){
-        endtrim = sum(numbers.splice(lastindex + 1))
+    if(peakIndices.length == 1 && valleyIndices.length == 0){
+        endtrim = sum(numbers.splice(1))
+    }else{
+        var lastindex = Math.max(last(peakIndices),last(valleyIndices))
+    
+        if(lastindex < numbers.length - 1){
+            endtrim = sum(numbers.splice(lastindex + 1))
+        }
     }
+    
 
     var temp
     function custart(){
@@ -71,6 +75,7 @@ function downscale(numbers:number[]):number[]{
         if(r.peakFirst){
             // V| cut start
             custart()
+            lastval = numbers[last(valleyIndices)]
         }else{
             //N cut end
             cutend()
@@ -86,17 +91,11 @@ function downscale(numbers:number[]):number[]{
         var righti = valleyIndices[i + 1] - 1
         values.push(calcMountain(lefti,peaki,righti,numbers))
     }
-    if(lastval > 0){
-        values[values.length - 1] += lastval
-    }
-    
-
+    values[values.length - 1] += lastval
     if(temp != null){
         values.push(temp)
     }
-    if(endtrim > 0){
-        values[values.length - 1] += endtrim
-    }
+    values[values.length - 1] += endtrim
     return values
 }
 
@@ -215,5 +214,3 @@ romaninput.addEventListener('input',() => {
     output.innerText = roman2decimal(romaninput.value) as any
 })
 
-
-var res = roman2decimal('IVI')//1914
